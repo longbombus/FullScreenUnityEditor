@@ -14,7 +14,9 @@ namespace WindowMaximizer.Editor
 		public bool IsFullScreen
 		{
 			get => (Style & WS.BORDER) == 0;
-			set => Style = value ? Style & ~WS.BORDER : Style | WS.BORDER;
+			set => Style = value
+				? Style & ~(WS.BORDER | WS.POPUP | WS.THICKFRAME)
+				: Style | WS.BORDER | WS.POPUP | WS.THICKFRAME;
 		}
 
 		public bool IsOverlay
@@ -30,11 +32,23 @@ namespace WindowMaximizer.Editor
 
 			var fitRect = IsOverlay ? monitorInfo.rcMonitor : monitorInfo.rcWork;
 			
+			if (IsFullScreen)
+			{
+				var borderSize = new Vector2Int(
+					GetSystemMetrics((int)SM.CXFIXEDFRAME),
+					GetSystemMetrics((int)SM.CYFIXEDFRAME)
+				);
+				fitRect.left -= borderSize.x;
+				fitRect.right += borderSize.x;
+				fitRect.top -= borderSize.y;
+				fitRect.bottom += borderSize.y;
+			}
+
 			SetWindowPos(
 				hWnd,
 				IsOverlay ? new System.IntPtr(-1) : new System.IntPtr(-2),
 				fitRect.left, fitRect.top,
-				fitRect.right + fitRect.left, fitRect.bottom + fitRect.top,
+				fitRect.right - fitRect.left, fitRect.bottom - fitRect.top,
 				(uint)SWP.DRAWFRAME
 			);
 		}
@@ -52,7 +66,7 @@ namespace WindowMaximizer.Editor
 		[DllImport(dllUser32)] private static extern System.IntPtr MonitorFromWindow(System.IntPtr hWnd, uint dwFlags);
 		[DllImport(dllUser32)] private static extern bool GetMonitorInfoA(System.IntPtr hMonitor, ref MonitorInfo lpmi);
 		[DllImport(dllUser32)] private static extern bool SetWindowPos(System.IntPtr hWnd, System.IntPtr hWndInsertAfter, int  X, int  Y, int  cx, int  cy, uint uFlags);
-		[DllImport(dllUser32)] private static extern bool GetClientRect(System.IntPtr hwnd, ref Rect lpRect);
+		[DllImport(dllUser32)] private static extern int GetSystemMetrics(int nIndex);
 		[DllImport(dllUser32)] private static extern long GetWindowLongPtrA(System.IntPtr hWnd, int index);
 		[DllImport(dllUser32)] private static extern long SetWindowLongPtrA(System.IntPtr hWnd, int index, long newValue);
 
@@ -61,13 +75,20 @@ namespace WindowMaximizer.Editor
 		{
 			BORDER = 0x00800000L,
 			POPUP = 0x80000000L,
-			SYSMENU = 0x00080000L,
+			THICKFRAME = 0x00040000L,
 		}
 
 		[System.Flags]
 		private enum SWP : uint
 		{
 			DRAWFRAME = 0x0020,
+		}
+
+
+		private enum SM
+		{
+			CXFIXEDFRAME = 7,
+			CYFIXEDFRAME = 8,
 		}
 
 		private enum Monitor
