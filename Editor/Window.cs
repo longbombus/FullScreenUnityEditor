@@ -1,7 +1,6 @@
 ﻿#if UNITY_EDITOR_WIN
 
 using System.Runtime.InteropServices;
-using UnityEngine;
 
 namespace WindowMaximizer.Editor
 {
@@ -13,10 +12,16 @@ namespace WindowMaximizer.Editor
 
 		public bool IsFullScreen
 		{
-			get => (Style & WS.BORDER) == 0;
-			set => Style = value
-				? Style & ~(WS.BORDER | WS.POPUP | WS.THICKFRAME)
-				: Style | WS.BORDER | WS.POPUP | WS.THICKFRAME;
+			get => (Style & WS.POPUP) != 0;
+			set
+			{
+				Style = value
+					? (Style & ~(WS.BORDER | WS.DLGFRAME | WS.THICKFRAME)) | WS.POPUP
+					: (Style & ~WS.POPUP) | WS.BORDER | WS.DLGFRAME | WS.THICKFRAME;
+				ExStyle = value
+					? ExStyle & ~(WS_EX.WINDOWEDGE | WS_EX.DLGMODALFRAME | WS_EX.CLIENTEDGE | WS_EX.STATICEDGE)
+					: ExStyle | WS_EX.WINDOWEDGE;
+			}
 		}
 
 		public bool IsOverlay
@@ -31,25 +36,13 @@ namespace WindowMaximizer.Editor
 			GetMonitorInfoA(hMonitor, ref monitorInfo);
 
 			var fitRect = IsOverlay ? monitorInfo.rcMonitor : monitorInfo.rcWork;
-			
-			if (IsFullScreen)
-			{
-				var borderSize = new Vector2Int(
-					GetSystemMetrics((int)SM.CXFIXEDFRAME),
-					GetSystemMetrics((int)SM.CYFIXEDFRAME)
-				);
-				fitRect.left -= borderSize.x;
-				fitRect.right += borderSize.x;
-				fitRect.top -= borderSize.y;
-				fitRect.bottom += borderSize.y;
-			}
 
 			SetWindowPos(
 				hWnd,
 				IsOverlay ? new System.IntPtr(-1) : new System.IntPtr(-2),
 				fitRect.left, fitRect.top,
 				fitRect.right - fitRect.left, fitRect.bottom - fitRect.top,
-				(uint)SWP.DRAWFRAME
+				(uint)SWP.FRAMECHANGED
 			);
 		}
 
@@ -59,6 +52,12 @@ namespace WindowMaximizer.Editor
 			set => SetWindowLongPtrA(hWnd, -16, (long) value);
 		}
 
+		private WS_EX ExStyle
+		{
+			get => (WS_EX) GetWindowLongPtrA(hWnd, -20);
+			set => SetWindowLongPtrA(hWnd, -20, (long) value);
+		}
+
 		#region WinApi
 		
 		private const string dllUser32 = "user32.dll";
@@ -66,35 +65,34 @@ namespace WindowMaximizer.Editor
 		[DllImport(dllUser32)] private static extern System.IntPtr MonitorFromWindow(System.IntPtr hWnd, uint dwFlags);
 		[DllImport(dllUser32)] private static extern bool GetMonitorInfoA(System.IntPtr hMonitor, ref MonitorInfo lpmi);
 		[DllImport(dllUser32)] private static extern bool SetWindowPos(System.IntPtr hWnd, System.IntPtr hWndInsertAfter, int  X, int  Y, int  cx, int  cy, uint uFlags);
-		[DllImport(dllUser32)] private static extern int GetSystemMetrics(int nIndex);
 		[DllImport(dllUser32)] private static extern long GetWindowLongPtrA(System.IntPtr hWnd, int index);
 		[DllImport(dllUser32)] private static extern long SetWindowLongPtrA(System.IntPtr hWnd, int index, long newValue);
 
 		[System.Flags]
-		private enum WS : long
+		private enum WS_EX : long
 		{
-			BORDER = 0x00800000L,
-			POPUP = 0x80000000L,
-			THICKFRAME = 0x00040000L,
+			DLGMODALFRAME = 0x00000001L,
+			WINDOWEDGE    = 0x00000100L,
+			CLIENTEDGE    = 0x00000200L,
+			STATICEDGE    = 0x00020000L,
 		}
 
 		[System.Flags]
-		private enum SWP : uint
+		private enum WS : long
 		{
-			DRAWFRAME = 0x0020,
+			BORDER     = 0x00800000L,
+			DLGFRAME   = 0x00400000L,
+			POPUP      = 0x80000000L,
+			THICKFRAME = 0x00040000L,
 		}
 
-
-		private enum SM
+		private enum SWP : uint
 		{
-			CXFIXEDFRAME = 7,
-			CYFIXEDFRAME = 8,
+			FRAMECHANGED = 0x0020,
 		}
 
 		private enum Monitor
 		{
-			DEFAULTTONULL = 0x00000000,
-			DEFAULTTOPRIMARY = 0x00000001,
 			DEFAULTTONEAREST = 0x00000002,
 		}
 		
