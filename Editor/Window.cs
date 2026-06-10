@@ -24,9 +24,6 @@ namespace EditorWindowMaximizer.Editor
 			}
 		}
 
-		public bool IsOverlay
-			=> IsFullScreen;
-
 		public void FitScreen()
 		{
 			var monitorInfo = new MonitorInfo();
@@ -35,11 +32,11 @@ namespace EditorWindowMaximizer.Editor
 			var hMonitor = MonitorFromWindow(hWnd, (uint)Monitor.DEFAULTTONEAREST);
 			GetMonitorInfoA(hMonitor, ref monitorInfo);
 
-			var fitRect = IsOverlay ? monitorInfo.rcMonitor : monitorInfo.rcWork;
+			var fitRect = IsFullScreen ? monitorInfo.rcMonitor : monitorInfo.rcWork;
 
 			SetWindowPos(
 				hWnd,
-				IsOverlay ? new System.IntPtr(-1) : new System.IntPtr(-2),
+				new System.IntPtr(-2),
 				fitRect.left, fitRect.top,
 				fitRect.right - fitRect.left, fitRect.bottom - fitRect.top,
 				(uint)SWP.FRAMECHANGED
