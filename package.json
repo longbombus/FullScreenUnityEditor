@@ -1,7 +1,7 @@
 {
     "name": "com.longbombus.editorwindowmaximizer",
     "displayName": "Editor Window Maximizer",
-    "version": "0.2.0",
+    "version": "0.3.0",
     "description": "Adds full screen mode for Windows Unity Editor (F11).",
     "keywords": [ "editor", "fullscreen", "tweak" ],
     "license": "MIT",
