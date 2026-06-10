@@ -1,9 +1,8 @@
 {
     "name": "com.longbombus.maximizer",
     "displayName": "Editor Window Maximizer",
-    "version": "0.1.0",
-    "unity": "2018.4",
-    "description": "Adds full screen modes for Windows editor.",
+    "version": "0.2.0",
+    "description": "Adds full screen mode for Windows editor (F11).",
     "keywords": [ "editor", "fullscreen", "tweak" ],
     "license": "MIT",
     "category": "Editor",
