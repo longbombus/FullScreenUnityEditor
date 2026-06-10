@@ -1,0 +1,37 @@
+name: Publish
+
+on:
+  push:
+    branches: [master]
+    paths: [package.json]
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    permissions:
+      packages: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          registry-url: 'https://npm.pkg.github.com'
+          scope: '@longbombus'
+
+      - run: |
+          VERSION=$(node -p "require('./package.json').version")
+          PACKAGE="@longbombus/$(node -p "require('./package.json').name")"
+          echo "Publishing $PACKAGE@$VERSION"
+
+          # Rewrite name to scoped for GitHub Packages
+          node -e "
+            const fs = require('fs');
+            const pkg = require('./package.json');
+            pkg.name = '@longbombus/' + pkg.name;
+            fs.writeFileSync('package.json', JSON.stringify(pkg, null, 4));
+          "
+
+          npm publish
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
