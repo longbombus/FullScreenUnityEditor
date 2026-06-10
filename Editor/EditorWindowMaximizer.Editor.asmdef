@@ -1,5 +1,6 @@
 {
-    "name": "WindowMaximizer",
+    "name": "EditorWindowMaximizer.Editor",
+    "rootNamespace": "EditorWindowMaximizer.Editor",
     "references": [],
     "includePlatforms": [
         "Editor"

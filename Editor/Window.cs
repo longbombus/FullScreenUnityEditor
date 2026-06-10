@@ -2,7 +2,7 @@
 
 using System.Runtime.InteropServices;
 
-namespace WindowMaximizer.Editor
+namespace EditorWindowMaximizer.Editor
 {
 	internal class Window
 	{

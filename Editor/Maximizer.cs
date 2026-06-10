@@ -2,7 +2,7 @@
 
 using UnityEditor;
 
-namespace WindowMaximizer.Editor
+namespace EditorWindowMaximizer.Editor
 {
 	internal static class Maximizer
 	{
