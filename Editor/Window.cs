@@ -24,7 +24,7 @@ namespace EditorWindowMaximizer.Editor
 			}
 		}
 
-		public void FitScreen()
+		public void FitScreen(bool coverTaskbar = true)
 		{
 			var monitorInfo = new MonitorInfo();
 			unsafe { monitorInfo.cbSize = (uint) sizeof(MonitorInfo); };
@@ -32,7 +32,7 @@ namespace EditorWindowMaximizer.Editor
 			var hMonitor = MonitorFromWindow(hWnd, (uint)Monitor.DEFAULTTONEAREST);
 			GetMonitorInfoA(hMonitor, ref monitorInfo);
 
-			var fitRect = IsFullScreen ? monitorInfo.rcMonitor : monitorInfo.rcWork;
+			var fitRect = (IsFullScreen && coverTaskbar) ? monitorInfo.rcMonitor : monitorInfo.rcWork;
 
 			SetWindowPos(
 				hWnd,
