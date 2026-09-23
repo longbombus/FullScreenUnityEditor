@@ -1,6 +1,15 @@
 # Unity Editor Window Maximizer
 
-Adds full screen mode to the Unity Editor on Windows. Press **F11** to toggle. Also available via **Window → Full Screen**.
+Adds full screen mode to the Unity Editor on Windows.
+
+## Usage
+
+Press **F11** to switch the modes. Also available via menu **Window → Full Screen**.
+
+Available modes:
+* Totally full screen (hides window header and taskbar)
+* Partially full screen (hides only window header)
+* Default window mode (restores default unity editor presence)
 
 ## Installation
 
